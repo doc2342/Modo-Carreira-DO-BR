@@ -262,12 +262,43 @@ function aplicarTransicoes(tab) {
   return { novo, playoff: { vB1, vB2, vencedor } };
 }
 
+const GENERICOS = ["117444", "34893", "108936", "108529"]; // clubes sentinela: não jogam a Copa (128 clubes = 7 fases)
+const FASES_COPA = ["1ª fase", "2ª fase", "3ª fase", "Oitavas de final", "Quartas de final", "Semifinal", "Final"];
+function textoCopa(c) {
+  if (c.campeao) return "CAMPEÃO! 🏆";
+  if (c.fase === "Final") return "vice-campeão";
+  if (c.fase === "Semifinal") return "eliminado na semifinal";
+  if (/^(Oitavas|Quartas)/.test(c.fase)) return "eliminado nas " + c.fase.toLowerCase();
+  return "eliminado na " + c.fase;
+}
+function simularCopa(bonusJogador) {
+  const meu = G.clubeId;
+  let vivos = embaralhar(CLUBES.filter(c => !GENERICOS.includes(c.id)).map(c => c.id));
+  let fase = 0, jogos = 0, elim = null;
+  while (vivos.length > 1) {
+    const prox = [];
+    for (let i = 0; i < vivos.length; i += 2) {
+      const a = vivos[i], b = vivos[i + 1];
+      const sa = forcaClube(clubePorId(a)) + (a === meu ? bonusJogador : 0);
+      const sb = forcaClube(clubePorId(b)) + (b === meu ? bonusJogador : 0);
+      const v = Math.random() < 1 / (1 + Math.exp(-(sa - sb) / 5)) ? a : b;
+      prox.push(v);
+      if (a === meu || b === meu) { jogos++; if (v !== meu) elim = FASES_COPA[fase]; }
+    }
+    vivos = prox; fase++;
+  }
+  if (!jogos) return { jogos: 0, fase: null, campeao: false };
+  return { jogos, fase: elim || "Campeão", campeao: vivos[0] === meu };
+}
+
 function simularTemporada() {
   const clube = clubePorId(G.clubeId);
   const S = forcaClube(clube);
   const grupoAntes = clube.grupo, tierAntes = clube.tier;
   const tit = titularidade(G.ovr, clube, G.espaco);
-  const jogosTot = 26;
+  const copa = simularCopa((G.ovr - S) * 0.3 * (tit / 100));
+  if (copa.campeao) { G.titulos++; G.titulosCopa = (G.titulosCopa || 0) + 1; }
+  const jogosTot = 22 + copa.jogos; // 22 de liga (12 clubes, ida e volta) + Copa do Brasil
   const jogos = clamp(Math.round(jogosTot * (tit / 100) * rnd(0.85, 1.05) * G.fx.jogosMult), 0, jogosTot);
 
   const intensidade = Math.exp((G.ovr - 75) / 14) * (S / 80);
@@ -317,7 +348,7 @@ function simularTemporada() {
   G.espaco = clamp(G.espaco + (nota >= 7 ? 5 : nota < 6 ? -5 : 0) + (50 - G.espaco) * 0.15, 0, 100);
 
   const row = { idade: G.idade, clubeId: G.clubeId, ovr: Math.round(ovrAntes), jogos, gols, ass, nota, pos, titulo, selNovos, tier: tierAntes, mov,
-    ligaAntes: rotuloGrupo(grupoAntes), grupoAntes, grupoDepois: clube.grupo, playoff: playoffInfo, intlRes, intlNova: G.intlQual ? G.intlQual.tipo : null };
+    ligaAntes: rotuloGrupo(grupoAntes), grupoAntes, grupoDepois: clube.grupo, playoff: playoffInfo, intlRes, copa, intlNova: G.intlQual ? G.intlQual.tipo : null };
   G.hist.push(row);
   G.ultimoRes = { ...row, tit, delta: G.ovr - ovrAntes, ovrDepois: Math.round(G.ovr), valor: valorMercadoAtual() };
   G.fx = { jogosMult: 1, ofertas: G.fx.ofertas };
@@ -452,7 +483,7 @@ function cabecalho() {
 function tabelaHist() {
   const linhas = G.hist.map(h => {
     const c = clubePorId(h.clubeId);
-    return `<tr><td>${h.idade}</td><td>${esc(c.nome)}${h.titulo ? " 🏆" : ""}${h.mov === "A" ? " <span class=\"tag-pos\">▲</span>" : ""}${h.mov === "R" ? " <span class=\"tag-neg\">▼</span>" : ""}</td><td class="c">${h.ovr}</td><td class="c">${h.jogos}</td><td class="c">${h.gols}</td><td class="c">${h.ass}</td></tr>`;
+    return `<tr><td>${h.idade}</td><td>${esc(c.nome)}${h.titulo || (h.copa && h.copa.campeao) ? " 🏆" : ""}${h.mov === "A" ? " <span class=\"tag-pos\">▲</span>" : ""}${h.mov === "R" ? " <span class=\"tag-neg\">▼</span>" : ""}</td><td class="c">${h.ovr}</td><td class="c">${h.jogos}</td><td class="c">${h.gols}</td><td class="c">${h.ass}</td></tr>`;
   }).join("");
   const atual = (G.fase !== "fim" && G.fase !== "oferta_base" && G.fase !== "resultado")
     ? `<tr class="atual"><td>${G.idade}</td><td>${esc(clubePorId(G.clubeId).nome)}</td><td class="c">${Math.round(G.ovr)}</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>` : "";
@@ -504,6 +535,7 @@ function render() {
       <div class="stats"><div class="stat"><b>${r.jogos}</b><small>Jogos</small></div><div class="stat"><b>${r.gols}</b><small>Gols</small></div>
         <div class="stat"><b>${r.ass}</b><small>Assist.</small></div><div class="stat"><b>${r.jogos ? r.nota.toFixed(1) : "—"}</b><small>Nota</small></div></div>
       <div class="resultado-msg">${r.ligaAntes}: terminou em <b>${ordinal}</b>${r.titulo ? ` — <b class="tag-pos">CAMPEÃO! 🏆</b>` : ""}${r.mov === "A" ? ` — <b class="tag-pos">⬆ ACESSO para ${paraGrupo(r.grupoDepois)}!</b>` : ""}${r.mov === "R" ? ` — <b class="tag-neg">⬇ REBAIXADO para ${paraGrupo(r.grupoDepois)}</b>` : ""}<br>
+        ${r.copa && r.copa.fase ? `Copa do Brasil: <b class="${r.copa.campeao ? "tag-pos" : ""}">${textoCopa(r.copa)}</b><br>` : ""}
         ${r.playoff ? `Playoff de acesso contra o ${esc(r.playoff.adv)}: <b class="${r.playoff.venceu ? "tag-pos" : "tag-neg"}">${r.playoff.venceu ? "venceu e subiu pro Brasileirão!" : "perdeu e ficou na Série B"}</b><br>` : ""}
         ${r.intlRes ? `🌎 ${r.intlRes.tipo === "CHAMPIONS" ? "Champions" : "Challenge"}: <b class="${r.intlRes.campeao ? "tag-pos" : ""}">${r.intlRes.campeao ? "CAMPEÃO! 🏆" : "eliminado — " + r.intlRes.fase}</b><br>` : ""}
         ${r.intlNova ? `🌎 Classificado para a <b>${r.intlNova === "CHAMPIONS" ? "Champions" : "Challenge"}</b> na próxima temporada (se seguir no clube)<br>` : ""}
