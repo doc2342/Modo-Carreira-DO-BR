@@ -27,7 +27,8 @@ for t in d["times"]:
     m = re.search(r"\b([BC])(\d)\b", s)
     tr = (2 if m.group(1)=="B" else 1) if m else 3
     e = est.get(str(t["id"]), {})
-    clubes[t["id"]] = {"id": t["id"], "nome": t["nome"], "tier": tr, "liga": ("Brasileirão" if tr==3 else ("Série B" if tr==2 else "Série C")) , "estadio": e.get("estadio",""), "cap": e.get("capacidade",0), "band": {"GK":[], "DF":[], "MF":[], "FW":[]}, "vals": {}}
+    grupo = (m.group(1)+m.group(2)) if m else "CB"
+    clubes[t["id"]] = {"id": t["id"], "nome": t["nome"], "tier": tr, "grupo": grupo, "liga": ("Brasileirão" if tr==3 else ("Série B" if tr==2 else "Série C")) , "estadio": e.get("estadio",""), "cap": e.get("capacidade",0), "band": {"GK":[], "DF":[], "MF":[], "FW":[]}, "vals": {}}
 for j in d["jogadores"]:
     c = clubes.get(j["idTime"])
     if not c: continue
@@ -39,7 +40,7 @@ for j in d["jogadores"]:
     if bb: c["band"][bb].append(round(best*0.4))
 out = []
 for c in clubes.values():
-    row = {"id": c["id"], "nome": c["nome"], "tier": c["tier"], "liga": c["liga"], "estadio": c["estadio"], "cap": c["cap"]}
+    row = {"id": c["id"], "nome": c["nome"], "tier": c["tier"], "grupo": c["grupo"], "liga": c["liga"], "estadio": c["estadio"], "cap": c["cap"]}
     for b, v in c["band"].items():
         v = sorted(v, reverse=True)[:4]
         row[b] = round(sum(v)/len(v)) if v else 60
