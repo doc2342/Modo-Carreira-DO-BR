@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carreira DO-BR</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #050914; --card: #0d1424; --card2: #141d33; --borda: #22304d;
+    --texto: #eef2fb; --fraco: #8b98b8; --acento: #f5d90a; --ok: #3ddc84; --ruim: #ff5c6c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: radial-gradient(1200px 500px at 50% -100px, #0f1d3d 0%, var(--bg) 60%); color: var(--texto);
+         font-family: 'Barlow', system-ui, sans-serif; min-height: 100vh; }
+  #app { max-width: 720px; margin: 0 auto; padding: 16px 16px 60px; }
+  h1, h2, h3, .cond { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; text-transform: uppercase; letter-spacing: .5px; }
+  h1 { font-size: 2.6rem; margin: 0; line-height: 1; }
+  h1 span { color: var(--acento); }
+  .fraco { color: var(--fraco); }
+  .card { background: var(--card); border: 1px solid var(--borda); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .btn { background: var(--acento); color: #111; border: 0; border-radius: 999px; padding: 12px 22px; font: 800 1.05rem 'Barlow Condensed', sans-serif;
+         text-transform: uppercase; letter-spacing: .6px; cursor: pointer; }
+  .btn.sec { background: transparent; color: var(--texto); border: 1px solid var(--borda); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .grid { display: grid; gap: 10px; }
+  label.campo { display: block; font-size: .75rem; color: var(--fraco); text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 6px; }
+  input[type=text], input[type=number] { width: 100%; background: var(--card2); border: 1px solid var(--borda); color: var(--texto);
+         border-radius: 10px; padding: 12px; font: 600 1rem 'Barlow', sans-serif; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--card2); border: 1px solid var(--borda); color: var(--texto); border-radius: 999px; padding: 9px 16px; cursor: pointer;
+          font: 700 .95rem 'Barlow Condensed', sans-serif; letter-spacing: .5px; }
+  .chip.on { background: var(--acento); color: #111; border-color: var(--acento); }
+  .camisa { display: flex; align-items: center; gap: 10px; }
+  .camisa button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--borda); background: var(--card2); color: var(--texto); font-size: 1.2rem; cursor: pointer; }
+  .camisa b { font: 800 2rem 'Barlow Condensed', sans-serif; min-width: 48px; text-align: center; }
+  .escudo { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+  .escudo.gerado { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font: 800 1rem 'Barlow Condensed'; color: #fff; }
+  .topo { display: flex; gap: 14px; align-items: center; }
+  .topo .num { font: 800 3rem 'Barlow Condensed'; color: var(--acento); line-height: 1; }
+  .topo .nome { font: 800 1.7rem 'Barlow Condensed'; text-transform: uppercase; line-height: 1.05; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+  .stat { background: var(--card2); border-radius: 10px; padding: 10px 6px; text-align: center; }
+  .stat b { display: block; font: 800 1.4rem 'Barlow Condensed'; }
+  .stat small { color: var(--fraco); font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; }
+  .ovr b { color: var(--acento); font-size: 2rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+  th { color: var(--fraco); font: 700 .72rem 'Barlow Condensed'; text-transform: uppercase; letter-spacing: 1px; text-align: left; padding: 6px 4px; }
+  td { padding: 7px 4px; border-top: 1px solid var(--borda); }
+  td.c { text-align: center; } th.c { text-align: center; }
+  tr.atual td { color: var(--acento); font-weight: 700; }
+  .oferta { display: flex; align-items: center; gap: 12px; background: var(--card2); border: 1px solid var(--borda); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+  .oferta .info { flex: 1; min-width: 0; }
+  .oferta .info b { font: 800 1.25rem 'Barlow Condensed'; text-transform: uppercase; display: block; }
+  .tit { font: 700 .8rem 'Barlow Condensed'; letter-spacing: 1px; color: var(--fraco); text-transform: uppercase; }
+  .tit em { font-style: normal; color: var(--ok); }
+  .tit em.baixa { color: var(--ruim); } .tit em.media { color: var(--acento); }
+  .opcao { display: block; width: 100%; text-align: left; background: var(--card2); border: 1px solid var(--borda); border-radius: 12px; color: var(--texto);
+           padding: 12px 14px; margin-bottom: 10px; cursor: pointer; }
+  .opcao:hover { border-color: var(--acento); }
+  .opcao b { font: 800 1.15rem 'Barlow Condensed'; text-transform: uppercase; }
+  .opcao small { display: block; color: var(--fraco); margin: 2px 0 8px; }
+  .prob { display: flex; gap: 8px; flex-wrap: wrap; }
+  .prob span { font: 700 .8rem 'Barlow Condensed'; letter-spacing: .5px; padding: 3px 9px; border-radius: 999px; background: #0a1226; border: 1px solid var(--borda); }
+  .prob span.pos { color: var(--ok); } .prob span.neg { color: var(--ruim); }
+  .escolha-n { color: var(--acento); font: 700 .8rem 'Barlow Condensed'; letter-spacing: 1.5px; }
+  .resultado-msg { border-left: 3px solid var(--acento); padding: 8px 12px; background: var(--card2); border-radius: 0 10px 10px 0; margin: 10px 0; }
+  .tag-pos { color: var(--ok); } .tag-neg { color: var(--ruim); }
+  @media (max-width: 480px) { h1 { font-size: 2.1rem; } .stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+// ============================================================================
+// Dados e constantes
+// ============================================================================
+const ASSET = "https://cdn.jsdelivr.net/gh/doc2342/7a0-DOBR-assets@main/";
+const CHAVE_SAVE = "carreira_dobr_v1";
+const POSICOES = ["CA", "PE", "PD", "MEI", "ME", "MD", "MC", "VOL", "LE", "LD", "ZAG"];
+const PESO_GOL = { CA: 1, PE: .6, PD: .6, MEI: .5, ME: .35, MD: .35, MC: .25, VOL: .1, LE: .08, LD: .08, ZAG: .06 };
+const PESO_ASS = { CA: .4, PE: .8, PD: .8, MEI: 1, ME: .7, MD: .7, MC: .5, VOL: .25, LE: .45, LD: .45, ZAG: .05 };
+const BASE_TIER = { 1: 52, 2: 66, 3: 80 };
+const DELTA_IDADE = { 16: 5, 17: 4.5, 18: 4, 19: 3.5, 20: 3, 21: 2.5, 22: 2, 23: 1.5, 24: 1, 25: .5, 26: 0, 27: -.3, 28: -.6, 29: -1, 30: -1.4, 31: -1.8, 32: -2.2 };
+const IDADE_MAX = 38;
+
+let CLUBES = [];
+let G = null;           // estado da carreira
+const $app = document.getElementById("app");
+
+// ============================================================================
+// Utilidades
+// ============================================================================
+const rnd = (a, b) => a + Math.random() * (b - a);
+const rndInt = (a, b) => Math.floor(rnd(a, b + 1));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const randn = () => { let u = 0; for (let i = 0; i < 6; i++) u += Math.random(); return (u - 3) / 0.7071; };
+const embaralhar = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clubePorId = id => CLUBES.find(c => c.id === id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function fmtValor(v) {
+  if (v >= 1e6) return "R$ " + (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace(".", ",") + "M";
+  return "R$ " + Math.round(v / 1e3) + "K";
+}
+
+function forcaClube(c) { // 0.4 do OVR-escala do clube pelos dados + base do tier
+  const media = (c.GK + c.DF + c.MF + c.FW) / 4;
+  const off = clamp((media - 90) * 0.5, -4, 4);
+  return BASE_TIER[c.tier] + off + (c._fx || 0);
+}
+
+function escudoHTML(c, tam) {
+  const ini = c.nome.replace(/[^\p{L}\p{N} ]/gu, "").split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join("").toUpperCase();
+  let h = 0; for (const ch of c.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const gerado = `<span class="escudo gerado" style="width:${tam}px;height:${tam}px;background:hsl(${h % 360},55%,38%)">${ini}</span>`;
+  return `<img class="escudo" style="width:${tam}px;height:${tam}px" src="${ASSET}crests/${c.id}.png" alt="" onerror="this.outerHTML=decodeURIComponent('${encodeURIComponent(gerado)}')">`;
+}
+
+// ============================================================================
+// Modelo do jogo
+// ============================================================================
+function titularidade(ovr, clube, espaco) {
+  return Math.round(clamp(50 + (ovr - forcaClube(clube)) * 4.2 + (espaco - 50) * 0.5, 1, 96));
+}
+
+function valorMercado(ovr, idade) {
+  const f = idade <= 20 ? 1.3 : idade <= 24 ? 1.15 : idade <= 28 ? 1 : idade <= 31 ? .7 : .4;
+  return 100000 * Math.exp((ovr - 52) * 0.13) * f;
+}
+
+function classeTit(t) { return t >= 60 ? "" : t >= 25 ? "media" : "baixa"; }
+
+function novaCarreira(dados) {
+  G = {
+    ...dados, ovr: 52, potencial: rndInt(72, 92), idade: 16, clubeId: null, espaco: 50,
+    titulos: 0, selJogos: 0, selConv: false, hist: [], fase: "oferta_base", eventos: [], evIdx: 0,
+    fx: { jogosMult: 1, ofertas: 0 }, log: [], ofertas: []
+  };
+}
+
+function salvar() { try { localStorage.setItem(CHAVE_SAVE, JSON.stringify(G)); } catch (e) {} }
+function carregarSave() { try { return JSON.parse(localStorage.getItem(CHAVE_SAVE)); } catch (e) { return null; } }
+
+// ----------------------------------------------------------------------------
+// Eventos de escolha: cada opção tem resultados com probabilidade. fx:
+//   espaco (+/-), ovr (+/-), valor (% sobre o valor atual, guardado em valorMult), jogosMult, ofertas
+// ----------------------------------------------------------------------------
+const EVENTOS = [
+  { id: "treinador", titulo: "Discussão com o treinador", texto: "Você teve uma discussão com o treinador depois de ser substituído.",
+    ops: [
+      { t: "Quero me posicionar", sub: "Ganha respeito e espaço", res: [{ p: 60, tag: "MAIS ESPAÇO", fx: { espaco: 12 }, msg: "O treinador gostou da postura e passou a te dar mais moral." }, { p: 40, tag: "MENOS ESPAÇO", fx: { espaco: -12 }, msg: "O treinador não gostou nada e te deixou de lado." }] },
+      { t: "Deixar passar", sub: "A relação continua como está", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "Você engoliu o orgulho. Nada muda." }] } ] },
+  { id: "patrocinio", titulo: "Proposta de patrocinador", texto: "Uma marca esportiva quer te contratar como garoto-propaganda.",
+    ops: [
+      { t: "Aceitar o contrato", sub: "Mais exposição, mais foco fora de campo", res: [{ p: 70, tag: "+ VALOR", fx: { valor: 8 }, msg: "A imagem cresceu e o valor de mercado acompanhou." }, { p: 30, tag: "DISTRAÇÃO", fx: { ovr: -0.6 }, msg: "As gravações atrapalharam a rotina de treinos." }] },
+      { t: "Recusar", sub: "Foco total no campo", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "Você seguiu focado nos treinos." }] } ] },
+  { id: "treino_extra", titulo: "Treino extra", texto: "Um preparador físico oferece um plano de treinos individual puxado.",
+    ops: [
+      { t: "Topar o plano", sub: "Pode evoluir mais — ou se machucar", res: [{ p: 65, tag: "+ OVR", fx: { ovr: 1 }, msg: "Você sentiu a evolução logo nas primeiras semanas." }, { p: 35, tag: "LESÃO LEVE", fx: { ovr: -0.3, espaco: -8 }, msg: "O corpo não aguentou a carga e você perdeu jogos." }] },
+      { t: "Só o treino normal", sub: "Sem riscos", res: [{ p: 100, tag: "+ OVR PEQUENO", fx: { ovr: 0.2 }, msg: "Rotina normal, evolução tranquila." }] } ] },
+  { id: "imprensa", titulo: "Repórter provoca", texto: "Depois do jogo, um repórter tenta te tirar do sério com uma pergunta polêmica.",
+    ops: [
+      { t: "Responder à altura", sub: "A torcida gosta de personalidade", res: [{ p: 50, tag: "+ VALOR", fx: { valor: 6 }, msg: "A resposta viralizou e a torcida abraçou você." }, { p: 50, tag: "- VALOR", fx: { valor: -6 }, msg: "A frase foi mal interpretada e virou crítica." }] },
+      { t: "Ficar em silêncio", sub: "Não dar assunto", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "Você saiu de fininho e o assunto morreu." }] } ] },
+  { id: "mentor", titulo: "Conselho de um veterano", texto: "Um jogador experiente se oferece para te ajudar no dia a dia.", maxIdade: 21,
+    ops: [
+      { t: "Pedir conselhos", sub: "Aprender com quem já viveu tudo", res: [{ p: 80, tag: "+ OVR", fx: { ovr: 0.8 }, msg: "Você absorveu detalhes que os treinos não ensinam." }, { p: 20, tag: "NADA MUDA", fx: {}, msg: "Ele estava mais a fim de falar do que de ensinar." }] },
+      { t: "Seguir sozinho", sub: "Seu jeito, seu ritmo", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "Você preferiu seguir o próprio caminho." }] } ] },
+  { id: "balada", titulo: "Convite pra balada", texto: "Os companheiros te chamam para sair na véspera de folga.", minIdade: 18,
+    ops: [
+      { t: "Ir com a galera", sub: "Bom pro clima, mas tem risco", res: [{ p: 40, tag: "MENOS ESPAÇO", fx: { espaco: -10 }, msg: "Alguém postou foto e o treinador ficou sabendo." }, { p: 60, tag: "NADA MUDA", fx: {}, msg: "Foi só diversão e ninguém ficou sabendo." }] },
+      { t: "Ficar em casa", sub: "Descansar e se cuidar", res: [{ p: 100, tag: "+ OVR PEQUENO", fx: { ovr: 0.2 }, msg: "Você acordou inteiro para o treino." }] } ] },
+  { id: "tecnico_novo", titulo: "Técnico novo", texto: "O clube trocou de comando e o novo treinador está avaliando o elenco.",
+    ops: [
+      { t: "Mostrar serviço", sub: "Se destacar nos treinos", res: [{ p: 55, tag: "MAIS ESPAÇO", fx: { espaco: 12 }, msg: "Você chamou a atenção do professor logo de cara." }, { p: 45, tag: "MENOS ESPAÇO", fx: { espaco: -6 }, msg: "Você se afobou e errou demais." }] },
+      { t: "Manter a discrição", sub: "Deixar o tempo trabalhar", res: [{ p: 100, tag: "+ ESPAÇO PEQUENO", fx: { espaco: 2 }, msg: "Você foi ganhando confiança aos poucos." }] } ] },
+  { id: "viral", titulo: "Lance viral", texto: "Um lance seu virou meme nas redes sociais.",
+    ops: [
+      { t: "Entrar na brincadeira", sub: "Postar e aproveitar a onda", res: [{ p: 60, tag: "+ VALOR", fx: { valor: 10 }, msg: "Milhões de visualizações e uma imagem mais forte." }, { p: 40, tag: "- VALOR", fx: { valor: -6, espaco: -3 }, msg: "O clube achou que você estava levando tudo na brincadeira." }] },
+      { t: "Ignorar", sub: "Não dar bola", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "O assunto passou rápido." }] } ] },
+  { id: "lesao", titulo: "Lesão séria", texto: "Você sentiu o joelho em um treino e o departamento médico foi chamado.", minIdade: 21, raro: true,
+    ops: [
+      { t: "Cirurgia agora", sub: "Parar já, voltar mais forte", res: [{ p: 100, tag: "MENOS JOGOS", fx: { jogosMult: 0.5, ovr: -0.4 }, msg: "Você passou boa parte da temporada no departamento médico." }] },
+      { t: "Tratamento conservador", sub: "Tentar seguir jogando", res: [{ p: 60, tag: "QUASE NADA", fx: { ovr: -0.2, jogosMult: 0.85 }, msg: "A dor deu trégua e você seguiu em campo." }, { p: 40, tag: "PIORA", fx: { ovr: -1.4, jogosMult: 0.6 }, msg: "A lesão piorou e a recuperação foi longa." }] } ] },
+  { id: "empresario", titulo: "Troca de empresário", texto: "Um agente conhecido no mercado quer representar você.",
+    ops: [
+      { t: "Trocar de empresário", sub: "Pode abrir portas — ou fechar", res: [{ p: 55, tag: "+ OFERTAS", fx: { ofertas: 1 }, msg: "O novo agente vive ligando para clubes por aí." }, { p: 45, tag: "- OFERTAS", fx: { ofertas: -1 }, msg: "O antigo agente ficou magoado e cortou contatos." }] },
+      { t: "Manter o atual", sub: "Quem tá comigo, fica", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "Nada muda com o empresário." }] } ] },
+  { id: "capitao", titulo: "Braçadeira de capitão", texto: "O treinador te oferece a braçadeira de capitão.", minIdade: 24,
+    ops: [
+      { t: "Assumir a braçadeira", sub: "Mais responsabilidade", res: [{ p: 60, tag: "MAIS ESPAÇO", fx: { espaco: 8, ovr: 0.3 }, msg: "O vestiário abraçou a liderança." }, { p: 40, tag: "PRESSÃO", fx: { ovr: -0.4 }, msg: "A pressão pesou e o desempenho caiu." }] },
+      { t: "Recusar", sub: "Deixar pra outro", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "Você declinou o convite com educação." }] } ] },
+  { id: "posicao", titulo: "Mudança de função", texto: "O treinador quer te testar em uma função tática diferente.",
+    ops: [
+      { t: "Topar o desafio", sub: "Aprender algo novo", res: [{ p: 50, tag: "+ OVR", fx: { ovr: 0.7 }, msg: "A nova função revelou qualidades que você não conhecia." }, { p: 50, tag: "MENOS ESPAÇO", fx: { espaco: -8 }, msg: "Você não se achou na função e perdeu espaço." }] },
+      { t: "Preferir sua posição", sub: "Segurança", res: [{ p: 100, tag: "NADA MUDA", fx: {}, msg: "Você seguiu no papel de sempre." }] } ] },
+];
+
+function sortearEventos() {
+  const base = EVENTOS.filter(e => (!e.minIdade || G.idade >= e.minIdade) && (!e.maxIdade || G.idade <= e.maxIdade) && (!e.raro || Math.random() < 0.25));
+  return embaralhar(base).slice(0, 2);
+}
+
+function aplicarFx(fx) {
+  if (fx.espaco) G.espaco = clamp(G.espaco + fx.espaco, 0, 100);
+  if (fx.ovr) G.ovr = clamp(G.ovr + fx.ovr, 30, 99);
+  if (fx.valor) G.valorMult = (G.valorMult || 1) * (1 + fx.valor / 100);
+  if (fx.jogosMult) G.fx.jogosMult *= fx.jogosMult;
+  if (fx.ofertas) G.fx.ofertas += fx.ofertas;
+}
+
+// ----------------------------------------------------------------------------
+// Temporada
+// ----------------------------------------------------------------------------
+function simularTemporada() {
+  const clube = clubePorId(G.clubeId);
+  const S = forcaClube(clube);
+  const tit = titularidade(G.ovr, clube, G.espaco);
+  const jogosTot = clube.tier === 1 ? 30 : 38;
+  const jogos = clamp(Math.round(jogosTot * (tit / 100) * rnd(0.85, 1.05) * G.fx.jogosMult), 0, jogosTot);
+
+  const intensidade = Math.exp((G.ovr - 75) / 14) * (S / 80);
+  const gols = Math.max(0, Math.round(jogos * PESO_GOL[G.pos] * 0.62 * intensidade * rnd(0.6, 1.4)));
+  const ass = Math.max(0, Math.round(jogos * PESO_ASS[G.pos] * 0.4 * intensidade * rnd(0.6, 1.4)));
+  const nota = jogos ? clamp(6.2 + (G.ovr - S) * 0.06 + (Math.random() - 0.5) * 0.8, 5, 9.2) : 0;
+
+  const q = (S - BASE_TIER[clube.tier]) + (G.ovr - S) * 0.3 * (jogos / jogosTot);
+  const pos = clamp(Math.round(10.5 - q * 0.95 + randn() * 4), 1, 20);
+  const titulo = pos === 1;
+  if (titulo) G.titulos++;
+
+  // seleção
+  let selNovos = 0;
+  if (G.idade >= 19 && Math.random() < clamp((G.ovr - 78) / 12, 0, 0.9)) { selNovos = rndInt(2, 9); G.selJogos += selNovos; G.selConv = true; }
+
+  // valor e evolução
+  const ovrAntes = G.ovr;
+  const idadeCurva = DELTA_IDADE[Math.min(G.idade, 32)] ?? -2.6;
+  let delta = idadeCurva + (jogos / jogosTot - 0.5) * 1.5 + randn() * 0.5;
+  if (delta > 0) delta *= clamp((G.potencial - G.ovr) / 6 + 0.25, 0, 1.2);
+  G.ovr = clamp(G.ovr + delta, 30, 99);
+  G.espaco = clamp(G.espaco + (nota >= 7 ? 5 : nota < 6 ? -5 : 0) + (50 - G.espaco) * 0.15, 0, 100);
+
+  const row = { idade: G.idade, clubeId: G.clubeId, ovr: Math.round(ovrAntes), jogos, gols, ass, nota, pos, titulo, selNovos, tier: clube.tier };
+  G.hist.push(row);
+  G.ultimoRes = { ...row, tit, delta: G.ovr - ovrAntes, ovrDepois: Math.round(G.ovr), valor: valorMercadoAtual() };
+  G.fx = { jogosMult: 1, ofertas: G.fx.ofertas };
+  G.fase = "resultado";
+}
+
+function valorMercadoAtual() { return valorMercado(G.ovr, G.idade) * (G.valorMult || 1); }
+
+function gerarOfertas(qtdMin) {
+  const atual = G.clubeId;
+  const alvo = Math.max(1, Math.min(4, qtdMin + (G.fx.ofertas > 0 ? 1 : 0) - (G.fx.ofertas < 0 ? 1 : 0)));
+  const cands = embaralhar(CLUBES.filter(c => c.id !== atual && Math.abs(forcaClube(c) - G.ovr) < 16));
+  const ofs = cands.slice(0, 9).map(c => ({ id: c.id, tit: titularidade(G.ovr, c, 50) }));
+  const sorted = ofs.sort((a, b) => forcaClube(clubePorId(b.id)) - forcaClube(clubePorId(a.id)));
+  const sel = [];
+  const sobe = sorted.find(o => forcaClube(clubePorId(o.id)) > forcaClube(clubePorId(atual)) + 2);
+  const seguro = sorted.filter(o => o.tit >= 60)[0];
+  [sobe, seguro, ...sorted].forEach(o => { if (o && !sel.some(x => x.id === o.id) && sel.length < alvo) sel.push(o); });
+  G.fx.ofertas = 0;
+  G.ofertas = sel;
+}
+
+function ofertasBase() {
+  const porTier = t => pick(CLUBES.filter(c => c.tier === t));
+  return [1, 2, 3].map(t => { const c = porTier(t); return { id: c.id, tit: titularidade(G.ovr, c, 50) }; });
+}
+
+function assinar(id) {
+  G.clubeId = id; G.espaco = 50; G.ofertas = [];
+  if (G.fase === "oferta_base") { G.fase = "evento"; } else { G.idade++; G.fase = "evento"; }
+  G.eventos = sortearEventos(); G.evIdx = 0; G.msgEv = null;
+  salvar(); render();
+}
+
+function continuarNoClube() { assinar(G.clubeId); }
+
+function proximo() {
+  if (G.fase === "resultado") {
+    if (G.idade >= IDADE_MAX || (G.idade >= 34 && G.ovr < 60)) { G.fase = "fim"; salvar(); render(); return; }
+    gerarOfertas(G.idade >= 30 ? 1 : 2);
+    G.fase = "ofertas";
+  }
+  salvar(); render();
+}
+
+function escolher(i) {
+  const ev = G.eventos[G.evIdx], op = ev.ops[i];
+  let r = Math.random() * 100, out = op.res[op.res.length - 1];
+  for (const o of op.res) { if (r < o.p) { out = o; break; } r -= o.p; }
+  aplicarFx(out.fx);
+  G.msgEv = { tag: out.tag, msg: out.msg, bom: out.tag.includes("+") || out.tag.startsWith("MAIS"), neutro: out.tag === "NADA MUDA" };
+  salvar(); render();
+}
+
+function avancarEvento() {
+  G.msgEv = null; G.evIdx++;
+  if (G.evIdx >= G.eventos.length) simularTemporada();
+  salvar(); render();
+}
+
+function aposentar() { G.fase = "fim"; salvar(); render(); }
+
+// ============================================================================
+// Telas
+// ============================================================================
+function telaInicio() {
+  const save = carregarSave();
+  $app.innerHTML = `
+    <div style="text-align:center;padding:60px 0 20px">
+      <h1>Carreira <span>DO-BR</span></h1>
+      <p class="fraco" style="margin:14px 0 30px">Faça escolhas e conquiste espaço.<br>Do juvenil aos 38 anos, com os clubes do Dugout.</p>
+      <div class="linha" style="justify-content:center">
+        <button class="btn" onclick="telaCriar()">Começar agora</button>
+        ${save ? `<button class="btn sec" onclick="G=carregarSave();render()">Continuar carreira</button>` : ""}
+      </div>
+    </div>`;
+}
+
+let formCriar = { nome: "", num: 10, altura: 178, peso: 72, pe: "DIREITO", pos: "MC" };
+function telaCriar() {
+  const f = formCriar;
+  $app.innerHTML = `
+    <div class="card">
+      <h2 style="margin-top:0">Criação do jogador</h2>
+      <label class="campo">Nome do jogador</label>
+      <input type="text" id="f-nome" maxlength="24" placeholder="Seu nome" value="${esc(f.nome)}" oninput="formCriar.nome=this.value">
+      <label class="campo">Número da camisa</label>
+      <div class="camisa"><button onclick="ajustaNum(-1)">−</button><b id="f-num">${f.num}</b><button onclick="ajustaNum(1)">+</button></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        <div><label class="campo">Altura: <span id="v-alt">${f.altura}</span> cm</label><input type="range" min="160" max="200" value="${f.altura}" style="width:100%" oninput="formCriar.altura=+this.value;document.getElementById('v-alt').textContent=this.value"></div>
+        <div><label class="campo">Peso: <span id="v-pes">${f.peso}</span> kg</label><input type="range" min="55" max="95" value="${f.peso}" style="width:100%" oninput="formCriar.peso=+this.value;document.getElementById('v-pes').textContent=this.value"></div>
+      </div>
+      <label class="campo">Pé dominante</label>
+      <div class="chips">${["ESQUERDO", "DIREITO"].map(p => `<span class="chip ${f.pe === p ? "on" : ""}" onclick="formCriar.pe='${p}';telaCriar()">${p}</span>`).join("")}</div>
+      <label class="campo">Selecione sua posição</label>
+      <div class="chips">${POSICOES.map(p => `<span class="chip ${f.pos === p ? "on" : ""}" onclick="formCriar.pos='${p}';telaCriar()">${p}</span>`).join("")}</div>
+      <div class="linha" style="margin-top:22px;justify-content:space-between">
+        <button class="btn sec" onclick="telaInicio()">Voltar</button>
+        <button class="btn" onclick="jogarAgora()">Jogar agora</button>
+      </div>
+    </div>`;
+}
+function ajustaNum(d) { formCriar.num = clamp(formCriar.num + d, 1, 99); document.getElementById("f-num").textContent = formCriar.num; }
+function jogarAgora() {
+  const nome = (formCriar.nome || "").trim() || "Jogador";
+  novaCarreira({ nome, num: formCriar.num, altura: formCriar.altura, peso: formCriar.peso, pe: formCriar.pe, pos: formCriar.pos });
+  G.ofertas = ofertasBase(); salvar(); render();
+}
+
+function cabecalho() {
+  const c = G.clubeId ? clubePorId(G.clubeId) : null;
+  const ovr = Math.round(G.ovr);
+  return `
+    <div class="card">
+      <div class="topo">
+        ${c ? escudoHTML(c, 56) : `<div class="num">#${G.num}</div>`}
+        <div style="flex:1;min-width:0">
+          <div class="nome">${esc(G.nome)}</div>
+          <div class="fraco cond" style="letter-spacing:1px">#${G.num} · ${G.pos} · ${c ? esc(c.nome) : "Sem clube"}${c ? " · " + c.liga : ""}</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat ovr"><b>${ovr}</b><small>OVR</small></div>
+        <div class="stat"><b>${G.idade}</b><small>Idade</small></div>
+        <div class="stat"><b>${fmtValor(valorMercadoAtual())}</b><small>Valor</small></div>
+        <div class="stat"><b>${String(G.titulos).padStart(2, "0")}</b><small>Títulos</small></div>
+      </div>
+      <div class="fraco cond" style="margin-top:10px;letter-spacing:1px">Seleção Brasileira: ${G.selConv ? G.selJogos + " jogos" : "ainda não convocado"}</div>
+    </div>`;
+}
+
+function tabelaHist() {
+  const linhas = G.hist.map(h => {
+    const c = clubePorId(h.clubeId);
+    return `<tr><td>${h.idade}</td><td>${esc(c.nome)}${h.titulo ? " 🏆" : ""}</td><td class="c">${h.ovr}</td><td class="c">${h.jogos}</td><td class="c">${h.gols}</td><td class="c">${h.ass}</td></tr>`;
+  }).join("");
+  const atual = (G.fase !== "fim" && G.fase !== "oferta_base" && G.fase !== "resultado")
+    ? `<tr class="atual"><td>${G.idade}</td><td>${esc(clubePorId(G.clubeId).nome)}</td><td class="c">${Math.round(G.ovr)}</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>` : "";
+  return `
+    <div class="card">
+      <table><thead><tr><th>Idade</th><th>Clube</th><th class="c">OVR</th><th class="c">Jogos</th><th class="c">Gols</th><th class="c">Assist.</th></tr></thead>
+      <tbody>${linhas}${atual}</tbody></table>
+    </div>`;
+}
+
+function cardOferta(o, rotulo) {
+  const c = clubePorId(o.id);
+  return `<div class="oferta">
+      ${escudoHTML(c, 48)}
+      <div class="info"><b>${esc(c.nome)}</b><span class="fraco">${c.liga}</span><br><span class="tit">Titularidade <em class="${classeTit(o.tit)}">${o.tit}%</em></span></div>
+      <button class="btn" onclick="assinar('${c.id}')">${rotulo}</button>
+    </div>`;
+}
+
+function render() {
+  if (!G) return telaInicio();
+  let corpo = "";
+  if (G.fase === "oferta_base") {
+    corpo = `<div class="card"><h2 style="margin-top:0">Oferta de base</h2><p class="fraco">Escolha o clube onde sua carreira começa.</p>
+      ${G.ofertas.map(o => cardOferta(o, "Assinar")).join("")}</div>`;
+    $app.innerHTML = cabecalho() + corpo; return;
+  }
+  if (G.fase === "evento") {
+    const ev = G.eventos[G.evIdx];
+    if (G.msgEv) {
+      const m = G.msgEv;
+      corpo = `<div class="card"><div class="escolha-n">ESCOLHA ${G.evIdx + 1}/${G.eventos.length}</div><h2 style="margin:4px 0 8px">${ev.titulo}</h2>
+        <div class="resultado-msg"><b class="${m.neutro ? "" : (m.bom ? "tag-pos" : "tag-neg")}">${m.tag}</b><br>${m.msg}</div>
+        <button class="btn" onclick="avancarEvento()">${G.evIdx + 1 >= G.eventos.length ? "Jogar a temporada" : "Continuar"}</button></div>`;
+    } else {
+      corpo = `<div class="card"><div class="escolha-n">ESCOLHA ${G.evIdx + 1}/${G.eventos.length}</div><h2 style="margin:4px 0 8px">${ev.titulo}</h2>
+        <p>${ev.texto}</p>
+        ${ev.ops.map((o, i) => `<button class="opcao" onclick="escolher(${i})"><b>${o.t}</b><small>${o.sub}</small>
+          <div class="prob">${o.res.map(r => `<span class="${r.tag.includes("MENOS") || r.tag.includes("-") || ["LESÃO LEVE", "DISTRAÇÃO", "PRESSÃO", "PIORA", "MENOS JOGOS"].includes(r.tag) ? "neg" : (r.tag === "NADA MUDA" ? "" : "pos")}">${r.tag} ${r.p}%</span>`).join("")}</div></button>`).join("")}
+      </div>`;
+    }
+    $app.innerHTML = cabecalho() + corpo + tabelaHist(); return;
+  }
+  if (G.fase === "resultado") {
+    const r = G.ultimoRes, c = clubePorId(r.clubeId);
+    const ordinal = r.pos + "º";
+    corpo = `<div class="card"><div class="escolha-n">FIM DA TEMPORADA — ${r.idade} ANOS</div>
+      <h2 style="margin:4px 0 8px">${esc(c.nome)}</h2>
+      <div class="stats"><div class="stat"><b>${r.jogos}</b><small>Jogos</small></div><div class="stat"><b>${r.gols}</b><small>Gols</small></div>
+        <div class="stat"><b>${r.ass}</b><small>Assist.</small></div><div class="stat"><b>${r.jogos ? r.nota.toFixed(1) : "—"}</b><small>Nota</small></div></div>
+      <div class="resultado-msg">${c.liga}: terminou em <b>${ordinal}</b>${r.titulo ? ` — <b class="tag-pos">CAMPEÃO! 🏆</b>` : ""}<br>
+        Titularidade na temporada: ${r.tit}% · OVR ${r.ovr} → <b class="${r.delta >= 0 ? "tag-pos" : "tag-neg"}">${r.ovrDepois}</b> (${r.delta >= 0 ? "+" : ""}${r.delta.toFixed(1)})<br>
+        Valor de mercado: <b>${fmtValor(r.valor)}</b>${r.selNovos ? `<br>🇧🇷 Convocado: ${r.selNovos} jogos pela Seleção` : ""}</div>
+      <button class="btn" onclick="proximo()">Continuar</button></div>`;
+    $app.innerHTML = cabecalho() + corpo + tabelaHist(); return;
+  }
+  if (G.fase === "ofertas") {
+    const atual = clubePorId(G.clubeId);
+    corpo = `<div class="card"><h2 style="margin-top:0">Mercado da bola</h2><p class="fraco">Você tem contrato com o ${esc(atual.nome)} — fique ou aceite uma nova proposta.</p>
+      <div class="oferta">${escudoHTML(atual, 48)}<div class="info"><b>${esc(atual.nome)}</b><span class="fraco">${atual.liga}</span><br><span class="tit">Titularidade <em class="${classeTit(titularidade(G.ovr, atual, G.espaco))}">${titularidade(G.ovr, atual, G.espaco)}%</em></span></div>
+        <button class="btn sec" onclick="continuarNoClube()">Ficar</button></div>
+      ${G.ofertas.map(o => cardOferta(o, "Assinar")).join("")}
+      ${G.idade >= 33 ? `<button class="btn sec" style="margin-top:8px" onclick="aposentar()">Pendurar as chuteiras</button>` : ""}</div>`;
+    $app.innerHTML = cabecalho() + corpo + tabelaHist(); return;
+  }
+  if (G.fase === "fim") {
+    const totJ = G.hist.reduce((s, h) => s + h.jogos, 0), totG = G.hist.reduce((s, h) => s + h.gols, 0), totA = G.hist.reduce((s, h) => s + h.ass, 0);
+    const pico = Math.max(...G.hist.map(h => h.ovr));
+    corpo = `<div class="card"><div class="escolha-n">FIM DE CARREIRA</div><h2 style="margin:4px 0 8px">${esc(G.nome)} pendurou as chuteiras</h2>
+      <div class="stats"><div class="stat"><b>${totJ}</b><small>Jogos</small></div><div class="stat"><b>${totG}</b><small>Gols</small></div>
+        <div class="stat"><b>${totA}</b><small>Assist.</small></div><div class="stat"><b>${G.titulos}</b><small>Títulos</small></div></div>
+      <div class="resultado-msg">Pico de OVR: <b>${pico}</b> · Clubes: ${new Set(G.hist.map(h => h.clubeId)).size} · Seleção: ${G.selJogos} jogos</div>
+      <button class="btn" onclick="localStorage.removeItem(CHAVE_SAVE);G=null;render()">Nova carreira</button></div>`;
+    $app.innerHTML = cabecalho() + corpo + tabelaHist(); return;
+  }
+}
+
+CLUBES = [{"id": "109354", "nome": "Ferreira Futebol Clube", "tier": 1, "liga": "Série C", "estadio": "John Michael Ozzy Osbourne Stadium", "cap": 24000, "GK": 90, "DF": 92, "MF": 92, "FW": 92}, {"id": "116953", "nome": "Furia Esporte Clube", "tier": 1, "liga": "Série C", "estadio": "La Furia", "cap": 12000, "GK": 92, "DF": 88, "MF": 63, "FW": 91}, {"id": "113619", "nome": "DBR Futebol Clube", "tier": 1, "liga": "Série C", "estadio": "DBR Stadium", "cap": 16000, "GK": 81, "DF": 80, "MF": 76, "FW": 83}, {"id": "109460", "nome": "Abelizado FC", "tier": 1, "liga": "Série C", "estadio": "Allianz Ferreira", "cap": 9100, "GK": 90, "DF": 87, "MF": 90, "FW": 90}, {"id": "114445", "nome": "Big Soccer FC", "tier": 3, "liga": "Brasileirão", "estadio": "Terezão", "cap": 40000, "GK": 86, "DF": 89, "MF": 89, "FW": 90}, {"id": "113819", "nome": "Esporte Clube Cajueiro", "tier": 2, "liga": "Série B", "estadio": "Cajuzão", "cap": 30000, "GK": 90, "DF": 89, "MF": 81, "FW": 91}, {"id": "112784", "nome": "Guará E.C", "tier": 3, "liga": "Brasileirão", "estadio": "Estádio Borris Tezanos Pinto", "cap": 45000, "GK": 98, "DF": 95, "MF": 96, "FW": 94}, {"id": "111388", "nome": "Chocolate Sensual", "tier": 2, "liga": "Série B", "estadio": "Príncipe Akeem Joffer", "cap": 17010, "GK": 93, "DF": 91, "MF": 95, "FW": 92}, {"id": "80978", "nome": "Botafogo F. R.", "tier": 1, "liga": "Série C", "estadio": "★ NILTON SANTOS ETERNO ★", "cap": 50750, "GK": 98, "DF": 96, "MF": 96, "FW": 92}, {"id": "113026", "nome": "Bit Futebol Clube", "tier": 2, "liga": "Série B", "estadio": "Estádio German Ezequiel Cano", "cap": 33000, "GK": 97, "DF": 92, "MF": 92, "FW": 88}, {"id": "111763", "nome": "Touro do Sertão", "tier": 3, "liga": "Brasileirão", "estadio": "Joia da Princesa", "cap": 33101, "GK": 91, "DF": 90, "MF": 90, "FW": 91}, {"id": "113151", "nome": "Marotos da Gama", "tier": 2, "liga": "Série B", "estadio": "Golden Laura Arena", "cap": 25000, "GK": 91, "DF": 90, "MF": 90, "FW": 90}, {"id": "109484", "nome": "Xurumela Caramuru", "tier": 1, "liga": "Série C", "estadio": "Brinco de Ouro da Mamãe", "cap": 20000, "GK": 90, "DF": 88, "MF": 88, "FW": 89}, {"id": "113438", "nome": "Eucaliptos MCZ", "tier": 1, "liga": "Série C", "estadio": "Nevoeirão Floresta Arena", "cap": 24180, "GK": 96, "DF": 88, "MF": 91, "FW": 92}, {"id": "111724", "nome": "Iron Shins Football Club", "tier": 1, "liga": "Série C", "estadio": "Iron Shins Arena", "cap": 3100, "GK": 78, "DF": 80, "MF": 75, "FW": 80}, {"id": "116658", "nome": "Deportivo Otavalo", "tier": 1, "liga": "Série C", "estadio": "Arena Nazacota Puento", "cap": 12000, "GK": 88, "DF": 89, "MF": 89, "FW": 88}, {"id": "36694", "nome": "Piraloku FC", "tier": 2, "liga": "Série B", "estadio": "Estádio Monumental Sheslon Abraao", "cap": 70000, "GK": 94, "DF": 93, "MF": 92, "FW": 93}, {"id": "109508", "nome": "Pavel & Amigos", "tier": 1, "liga": "Série C", "estadio": "Tavernão", "cap": 18000, "GK": 92, "DF": 94, "MF": 92, "FW": 90}, {"id": "112100", "nome": "Gigante Vasco Brasilia", "tier": 1, "liga": "Série C", "estadio": "Caldeirão Cruzmaltino", "cap": 54000, "GK": 91, "DF": 89, "MF": 90, "FW": 92}, {"id": "112391", "nome": "Real Madruga", "tier": 1, "liga": "Série C", "estadio": "Don Ramón Valdés", "cap": 50350, "GK": 87, "DF": 85, "MF": 82, "FW": 90}, {"id": "113760", "nome": "Centro Sportivo Alagoano", "tier": 1, "liga": "Série C", "estadio": "Mutange", "cap": 30000, "GK": 92, "DF": 91, "MF": 92, "FW": 94}, {"id": "115952", "nome": "Ceará Sporting Club", "tier": 1, "liga": "Série C", "estadio": "Arena Castralião", "cap": 12150, "GK": 85, "DF": 85, "MF": 81, "FW": 87}, {"id": "114568", "nome": "Electro Club", "tier": 1, "liga": "Série C", "estadio": "General Severiano", "cap": 10800, "GK": 90, "DF": 88, "MF": 91, "FW": 89}, {"id": "108357", "nome": "Club de Regatas do Quiosque", "tier": 1, "liga": "Série C", "estadio": "Estádio Miguel Pérez Cuesta", "cap": 25000, "GK": 88, "DF": 78, "MF": 89, "FW": 88}, {"id": "109631", "nome": "XAVIER VASCO FC", "tier": 1, "liga": "Série C", "estadio": "Caldeirão do Xavier", "cap": 33600, "GK": 87, "DF": 83, "MF": 77, "FW": 88}, {"id": "108441", "nome": "bnetto", "tier": 2, "liga": "Série B", "estadio": "bnetto Arena", "cap": 60000, "GK": 96, "DF": 94, "MF": 91, "FW": 92}, {"id": "109788", "nome": "Udi City F.C", "tier": 3, "liga": "Brasileirão", "estadio": "Parque do Sabiá", "cap": 69000, "GK": 97, "DF": 96, "MF": 95, "FW": 94}, {"id": "112731", "nome": "Nettotricolor", "tier": 1, "liga": "Série C", "estadio": "Moruntri", "cap": 25000, "GK": 93, "DF": 89, "MF": 90, "FW": 90}, {"id": "113620", "nome": "Maranhão Guarás", "tier": 1, "liga": "Série C", "estadio": "Arena Guarás", "cap": 65000, "GK": 95, "DF": 86, "MF": 89, "FW": 90}, {"id": "104045", "nome": "FC Belo Horizonte", "tier": 1, "liga": "Série C", "estadio": "Stadion Mineirao", "cap": 68000, "GK": 48, "DF": 75, "MF": 87, "FW": 86}, {"id": "115838", "nome": "Vascão da Massa", "tier": 1, "liga": "Série C", "estadio": "São Janu", "cap": 19800, "GK": 86, "DF": 86, "MF": 86, "FW": 84}, {"id": "114017", "nome": "Big Fish FC", "tier": 2, "liga": "Série B", "estadio": "Nintendo Aquarium", "cap": 40000, "GK": 88, "DF": 92, "MF": 91, "FW": 88}, {"id": "109369", "nome": "Rato da Gama", "tier": 2, "liga": "Série B", "estadio": "São Ratuário", "cap": 50000, "GK": 92, "DF": 88, "MF": 90, "FW": 92}, {"id": "114471", "nome": "Esporte Clube Caju", "tier": 1, "liga": "Série C", "estadio": "Arena Cajuverso", "cap": 25000, "GK": 86, "DF": 85, "MF": 89, "FW": 88}, {"id": "109538", "nome": "Geny F.C", "tier": 3, "liga": "Brasileirão", "estadio": "Estádio Hafthor Thorgilsson", "cap": 50000, "GK": 90, "DF": 91, "MF": 90, "FW": 91}, {"id": "115675", "nome": "Sobradinho Esporte Clube", "tier": 1, "liga": "Série C", "estadio": "Augustinho Lima", "cap": 60000, "GK": 95, "DF": 88, "MF": 91, "FW": 90}, {"id": "111441", "nome": "Piratas do Clubismo", "tier": 1, "liga": "Série C", "estadio": "Matchlogs.com Stadium", "cap": 43000, "GK": 97, "DF": 94, "MF": 93, "FW": 92}, {"id": "109470", "nome": "Bar do Cróvis", "tier": 1, "liga": "Série C", "estadio": "Arena Conti Crovão", "cap": 35580, "GK": 91, "DF": 88, "MF": 92, "FW": 88}, {"id": "115177", "nome": "Bagrinhos FC", "tier": 1, "liga": "Série C", "estadio": "Manguito", "cap": 48000, "GK": 88, "DF": 90, "MF": 89, "FW": 92}, {"id": "114555", "nome": "Galladoz FC", "tier": 1, "liga": "Série C", "estadio": "Maria Lamas Farache", "cap": 40000, "GK": 84, "DF": 89, "MF": 87, "FW": 91}, {"id": "100327", "nome": "Sport Club Flecha", "tier": 2, "liga": "Série B", "estadio": "🏹Flecha Arena Park🏹", "cap": 50000, "GK": 100, "DF": 92, "MF": 91, "FW": 91}, {"id": "112913", "nome": "Salvador FC", "tier": 1, "liga": "Série C", "estadio": "Arena Fonte Nova", "cap": 25000, "GK": 87, "DF": 86, "MF": 87, "FW": 89}, {"id": "109254", "nome": "Atlético Potiguar", "tier": 3, "liga": "Brasileirão", "estadio": "Arena Carena (O Carenão)", "cap": 30000, "GK": 87, "DF": 90, "MF": 85, "FW": 87}, {"id": "114309", "nome": "Galácticos do Tsunami", "tier": 1, "liga": "Série C", "estadio": "Beyblade Arena", "cap": 40000, "GK": 87, "DF": 90, "MF": 91, "FW": 91}, {"id": "107132", "nome": "Paulistano Athletic Club", "tier": 1, "liga": "Série C", "estadio": "Estádio Velódromo Paulistano", "cap": 20000, "GK": 89, "DF": 91, "MF": 91, "FW": 92}, {"id": "113695", "nome": "Didicos FC", "tier": 1, "liga": "Série C", "estadio": "Didicones del Brisa", "cap": 14000, "GK": 88, "DF": 90, "MF": 90, "FW": 88}, {"id": "112960", "nome": "Futleria Futebol Clube", "tier": 1, "liga": "Série C", "estadio": "Distrital do Inamar", "cap": 10000, "GK": 86, "DF": 86, "MF": 86, "FW": 90}, {"id": "106303", "nome": "Trem-Rasta da Colina", "tier": 1, "liga": "Série C", "estadio": "São Rastafário", "cap": 50000, "GK": 92, "DF": 94, "MF": 94, "FW": 92}, {"id": "112690", "nome": "Bangu", "tier": 2, "liga": "Série B", "estadio": "Moça Bonita", "cap": 50000, "GK": 98, "DF": 96, "MF": 92, "FW": 91}, {"id": "88774", "nome": "Project Mayhem", "tier": 1, "liga": "Série C", "estadio": "Fight Club", "cap": 77100, "GK": 94, "DF": 87, "MF": 88, "FW": 93}, {"id": "108404", "nome": "Amnésia F.C.", "tier": 2, "liga": "Série B", "estadio": "Arena Esquecimento", "cap": 48000, "GK": 98, "DF": 92, "MF": 88, "FW": 92}, {"id": "114243", "nome": "Taromagento FC", "tier": 1, "liga": "Série C", "estadio": "Vale das ilusões Tarottokura", "cap": 10819, "GK": 83, "DF": 88, "MF": 83, "FW": 84}, {"id": "112729", "nome": "Balta Financial Services", "tier": 2, "liga": "Série B", "estadio": "Arena Caramelo", "cap": 44000, "GK": 93, "DF": 92, "MF": 94, "FW": 94}, {"id": "113146", "nome": "3Kings United", "tier": 2, "liga": "Série B", "estadio": "Kingsland", "cap": 25000, "GK": 96, "DF": 90, "MF": 92, "FW": 88}, {"id": "106152", "nome": "Campinas Futebol Clube", "tier": 1, "liga": "Série C", "estadio": "Cerecamp", "cap": 50000, "GK": 92, "DF": 91, "MF": 94, "FW": 93}, {"id": "112411", "nome": "Tramontina FC", "tier": 1, "liga": "Série C", "estadio": "Panelarium", "cap": 33000, "GK": 91, "DF": 87, "MF": 83, "FW": 77}, {"id": "106610", "nome": "FN United", "tier": 1, "liga": "Série C", "estadio": "FnU Stadium", "cap": 60000, "GK": 88, "DF": 90, "MF": 86, "FW": 86}, {"id": "115102", "nome": "Club Vikings Valhalla", "tier": 1, "liga": "Série C", "estadio": "Ragnarök Stadium", "cap": 14000, "GK": 86, "DF": 88, "MF": 86, "FW": 88}, {"id": "115937", "nome": "Stefinho FC", "tier": 1, "liga": "Série C", "estadio": "Stadium", "cap": 1790, "GK": 38, "DF": 44, "MF": 32, "FW": 64}, {"id": "114426", "nome": "MSFlamengo", "tier": 1, "liga": "Série C", "estadio": "Schuhcrutz Arena", "cap": 20000, "GK": 88, "DF": 87, "MF": 78, "FW": 86}, {"id": "108755", "nome": "Pois Pronto Futebol Clube", "tier": 1, "liga": "Série C", "estadio": "Albertão", "cap": 34000, "GK": 88, "DF": 86, "MF": 85, "FW": 84}, {"id": "108607", "nome": "@intervalqueire", "tier": 1, "liga": "Série C", "estadio": "São Januário", "cap": 45000, "GK": 88, "DF": 92, "MF": 92, "FW": 95}, {"id": "109650", "nome": "EC Sírio", "tier": 1, "liga": "Série C", "estadio": "Municipal Amaziles de Castro", "cap": 50000, "GK": 91, "DF": 91, "MF": 93, "FW": 91}, {"id": "113301", "nome": "Mýkonos Grecco Futebol Club", "tier": 1, "liga": "Série C", "estadio": "Mýkonos Municipal Stadium", "cap": 29200, "GK": 90, "DF": 89, "MF": 89, "FW": 91}, {"id": "115951", "nome": "Seu Serrinha FC", "tier": 1, "liga": "Série C", "estadio": "Ulrico Mursa", "cap": 7750, "GK": 86, "DF": 88, "MF": 89, "FW": 90}, {"id": "108483", "nome": "Atlético Insulano Futsal Club", "tier": 1, "liga": "Série C", "estadio": "Brazuka's", "cap": 10000, "GK": 87, "DF": 91, "MF": 89, "FW": 89}, {"id": "117025", "nome": "Esporte Clube Baconlândia", "tier": 1, "liga": "Série C", "estadio": "Arena do Porcão", "cap": 10000, "GK": 87, "DF": 83, "MF": 85, "FW": 79}, {"id": "109844", "nome": "Desportivo Sol", "tier": 3, "liga": "Brasileirão", "estadio": "Arena do Sol", "cap": 36000, "GK": 94, "DF": 90, "MF": 91, "FW": 95}, {"id": "115328", "nome": "AD Joãonesburgo", "tier": 1, "liga": "Série C", "estadio": "Soccer City", "cap": 20000, "GK": 83, "DF": 90, "MF": 90, "FW": 88}, {"id": "111436", "nome": "BOTACOCA", "tier": 1, "liga": "Série C", "estadio": "Barril de Coca", "cap": 29840, "GK": 92, "DF": 92, "MF": 89, "FW": 92}, {"id": "107338", "nome": "FC Skip", "tier": 1, "liga": "Série C", "estadio": "Skip Island", "cap": 17650, "GK": 77, "DF": 86, "MF": 91, "FW": 90}, {"id": "107653", "nome": "Sport Club K-maradas", "tier": 1, "liga": "Série C", "estadio": "GoAhead Stadium", "cap": 20040, "GK": 90, "DF": 91, "MF": 93, "FW": 90}, {"id": "113491", "nome": "Santaço FC", "tier": 1, "liga": "Série C", "estadio": "God Only Knows", "cap": 24000, "GK": 82, "DF": 88, "MF": 88, "FW": 89}, {"id": "115071", "nome": "Paracambi FC", "tier": 1, "liga": "Série C", "estadio": "Estádio Brasil Industrial", "cap": 27000, "GK": 88, "DF": 88, "MF": 89, "FW": 87}, {"id": "116740", "nome": "Voltorb FC", "tier": 1, "liga": "Série C", "estadio": "Ginásio de Vermilion", "cap": 3420, "GK": 87, "DF": 81, "MF": 79, "FW": 78}, {"id": "106340", "nome": "São Paulo F.C.", "tier": 3, "liga": "Brasileirão", "estadio": "Morumbi", "cap": 50000, "GK": 96, "DF": 93, "MF": 89, "FW": 92}, {"id": "106048", "nome": "Real Molotov F.C.", "tier": 2, "liga": "Série B", "estadio": "Sociedade Coquetel Arena", "cap": 55555, "GK": 92, "DF": 95, "MF": 96, "FW": 95}, {"id": "108193", "nome": "S.C. Quebra Perna", "tier": 1, "liga": "Série C", "estadio": "Haanstra 154", "cap": 8000, "GK": 88, "DF": 90, "MF": 90, "FW": 90}, {"id": "108965", "nome": "FC Homero", "tier": 1, "liga": "Série C", "estadio": "Palácio dos Santos", "cap": 60000, "GK": 90, "DF": 88, "MF": 86, "FW": 85}, {"id": "113173", "nome": "The Walking Dead", "tier": 2, "liga": "Série B", "estadio": "Alexandria", "cap": 33360, "GK": 90, "DF": 91, "MF": 91, "FW": 92}, {"id": "115416", "nome": "Imortal Tubarão", "tier": 1, "liga": "Série C", "estadio": "Arena Tubarão", "cap": 35000, "GK": 84, "DF": 90, "MF": 90, "FW": 91}, {"id": "108363", "nome": "Candal FC", "tier": 3, "liga": "Brasileirão", "estadio": "Estádio Mario Navarrete", "cap": 33000, "GK": 95, "DF": 92, "MF": 90, "FW": 90}, {"id": "106057", "nome": "Nivek United", "tier": 3, "liga": "Brasileirão", "estadio": "Estádio Judy Dumont", "cap": 60000, "GK": 98, "DF": 93, "MF": 92, "FW": 94}, {"id": "107646", "nome": "Golden Eagle Warriors", "tier": 1, "liga": "Série C", "estadio": "Stephen Curry 30 Arena", "cap": 30450, "GK": 93, "DF": 90, "MF": 89, "FW": 92}, {"id": "108874", "nome": "Bento FC", "tier": 2, "liga": "Série B", "estadio": "Bentossauro", "cap": 60000, "GK": 90, "DF": 93, "MF": 91, "FW": 88}, {"id": "109202", "nome": "Lunguinha F.C", "tier": 1, "liga": "Série C", "estadio": "Lunga Arena", "cap": 15000, "GK": 30, "DF": 84, "MF": 74, "FW": 87}, {"id": "108790", "nome": "Athayde FC", "tier": 1, "liga": "Série C", "estadio": "AVA Arena", "cap": 47000, "GK": 83, "DF": 88, "MF": 87, "FW": 90}, {"id": "106481", "nome": "Mugraria Futebol Raça", "tier": 1, "liga": "Série C", "estadio": "Olímpico Monumental", "cap": 45000, "GK": 91, "DF": 86, "MF": 84, "FW": 84}, {"id": "112157", "nome": "ATHLETICO PRaiano", "tier": 1, "liga": "Série C", "estadio": "Mário C. Petraglia", "cap": 60000, "GK": 95, "DF": 83, "MF": 86, "FW": 86}, {"id": "108430", "nome": "Chronos Football Club", "tier": 1, "liga": "Série C", "estadio": "Kairós Arena", "cap": 10000, "GK": 89, "DF": 90, "MF": 92, "FW": 95}, {"id": "109467", "nome": "Colorado da Serra", "tier": 2, "liga": "Série B", "estadio": "Passo do Inferno", "cap": 37000, "GK": 95, "DF": 92, "MF": 91, "FW": 91}, {"id": "112939", "nome": "Wolf Guará Futebol Clube", "tier": 2, "liga": "Série B", "estadio": "Graxa Arena", "cap": 40000, "GK": 89, "DF": 88, "MF": 90, "FW": 92}, {"id": "115424", "nome": "Revelação F.C", "tier": 1, "liga": "Série C", "estadio": "Arena Dois de Julho", "cap": 22550, "GK": 88, "DF": 86, "MF": 89, "FW": 88}, {"id": "111776", "nome": "Avanti Palestra!", "tier": 3, "liga": "Brasileirão", "estadio": "Estádio Multiversal Schot-Matsuda", "cap": 41457, "GK": 96, "DF": 92, "MF": 91, "FW": 92}, {"id": "109795", "nome": "Araras Vermelhas FC", "tier": 1, "liga": "Série C", "estadio": "Estádio Araritaguaba", "cap": 36190, "GK": 91, "DF": 91, "MF": 90, "FW": 91}, {"id": "113013", "nome": "Bastardos Inglórios FC", "tier": 1, "liga": "Série C", "estadio": "Antifa Arena", "cap": 26999, "GK": 86, "DF": 89, "MF": 90, "FW": 93}, {"id": "113241", "nome": "Estrela da Ponte", "tier": 1, "liga": "Série C", "estadio": "Ovídeo Bueno", "cap": 54576, "GK": 84, "DF": 86, "MF": 90, "FW": 89}, {"id": "106046", "nome": "Capelópolis FC", "tier": 2, "liga": "Série B", "estadio": "São Capelário", "cap": 100000, "GK": 98, "DF": 95, "MF": 95, "FW": 94}, {"id": "112710", "nome": "Clube Atlético Bancário", "tier": 1, "liga": "Série C", "estadio": "Estação Férrea de Pelotas", "cap": 25000, "GK": 86, "DF": 87, "MF": 91, "FW": 90}, {"id": "106087", "nome": "Club Athletico Paranaense", "tier": 1, "liga": "Série C", "estadio": "Arena da Baixaria", "cap": 44450, "GK": 88, "DF": 88, "MF": 92, "FW": 94}, {"id": "106096", "nome": "Esporte Clube Paulista", "tier": 1, "liga": "Série C", "estadio": "Campo Belíssimo", "cap": 37000, "GK": 30, "DF": 75, "MF": 75, "FW": 86}, {"id": "108271", "nome": "Atletic Rock", "tier": 2, "liga": "Série B", "estadio": "Woodstock", "cap": 40650, "GK": 93, "DF": 92, "MF": 89, "FW": 91}, {"id": "108746", "nome": "Flamengo", "tier": 1, "liga": "Série C", "estadio": "Maracanã", "cap": 30000, "GK": 80, "DF": 80, "MF": 74, "FW": 84}, {"id": "114410", "nome": "Tux Soccer", "tier": 1, "liga": "Série C", "estadio": "Tux Arena", "cap": 30040, "GK": 100, "DF": 85, "MF": 83, "FW": 85}, {"id": "116424", "nome": "Sociedade Esportiva Aurora", "tier": 1, "liga": "Série C", "estadio": "Estádio Mario Pessoa", "cap": 24000, "GK": 87, "DF": 86, "MF": 81, "FW": 83}, {"id": "109833", "nome": "Lespa FC", "tier": 1, "liga": "Série C", "estadio": "Monumental MVB", "cap": 41705, "GK": 92, "DF": 86, "MF": 87, "FW": 87}, {"id": "109773", "nome": "BJ VASCO", "tier": 1, "liga": "Série C", "estadio": "São Januário do Centro Oeste", "cap": 40010, "GK": 86, "DF": 88, "MF": 89, "FW": 90}, {"id": "108111", "nome": "Ocean FC", "tier": 1, "liga": "Série C", "estadio": "Coral Reef", "cap": 19170, "GK": 82, "DF": 83, "MF": 86, "FW": 89}, {"id": "111727", "nome": "RuPaul's Drags Team", "tier": 1, "liga": "Série C", "estadio": "Interior Illusions Lounge", "cap": 8000, "GK": 81, "DF": 79, "MF": 72, "FW": 72}, {"id": "108867", "nome": "Meier Futebol Clube", "tier": 2, "liga": "Série B", "estadio": "Estádio Meier", "cap": 60000, "GK": 92, "DF": 91, "MF": 92, "FW": 91}, {"id": "115247", "nome": "Trenó Virtual", "tier": 1, "liga": "Série C", "estadio": "Treno.com.br", "cap": 12600, "GK": 80, "DF": 76, "MF": 81, "FW": 84}, {"id": "112954", "nome": "Niterói Futebol Clube", "tier": 2, "liga": "Série B", "estadio": "Estádio Caio Martins", "cap": 32850, "GK": 98, "DF": 90, "MF": 88, "FW": 86}, {"id": "108397", "nome": "Trem Fantasma", "tier": 1, "liga": "Série C", "estadio": "Estádio Gabriel Boschilia", "cap": 96600, "GK": 87, "DF": 88, "MF": 89, "FW": 88}, {"id": "108366", "nome": "Na Canela™", "tier": 3, "liga": "Brasileirão", "estadio": "Ninho da Coruja", "cap": 52000, "GK": 84, "DF": 88, "MF": 88, "FW": 87}, {"id": "43469", "nome": "Cirandinha DRAMA Futebol Clube", "tier": 1, "liga": "Série C", "estadio": "FAVELA DO CIRANDINHA", "cap": 108000, "GK": 88, "DF": 86, "MF": 88, "FW": 88}, {"id": "114616", "nome": "Douradina City", "tier": 2, "liga": "Série B", "estadio": "Arena Lobo Guará", "cap": 65000, "GK": 97, "DF": 92, "MF": 89, "FW": 91}, {"id": "108343", "nome": "Realengo Futebol Clube", "tier": 1, "liga": "Série C", "estadio": "Cariocão Stadium", "cap": 16000, "GK": 84, "DF": 83, "MF": 82, "FW": 82}, {"id": "113170", "nome": "Máxima F.C", "tier": 1, "liga": "Série C", "estadio": "Máxima Arena", "cap": 33000, "GK": 86, "DF": 89, "MF": 90, "FW": 89}, {"id": "112490", "nome": "Lôbrego FC", "tier": 1, "liga": "Série C", "estadio": "Covil das Trevas", "cap": 51450, "GK": 87, "DF": 87, "MF": 84, "FW": 87}, {"id": "109800", "nome": "Dynamo Osasco", "tier": 1, "liga": "Série C", "estadio": "Thomas Sankara", "cap": 40000, "GK": 77, "DF": 87, "MF": 88, "FW": 90}, {"id": "117113", "nome": "Chelsea Football Club", "tier": 1, "liga": "Série C", "estadio": "Stamford Bridge", "cap": 4400, "GK": 80, "DF": 68, "MF": 70, "FW": 76}, {"id": "113032", "nome": "Municipal FC", "tier": 1, "liga": "Série C", "estadio": "Estádio Municipal Piche e Maia", "cap": 31000, "GK": 86, "DF": 86, "MF": 89, "FW": 90}, {"id": "109643", "nome": "Baile de Munique br", "tier": 1, "liga": "Série C", "estadio": "Stadium", "cap": 11000, "GK": 85, "DF": 88, "MF": 83, "FW": 85}, {"id": "109694", "nome": "FC Made in Hell", "tier": 1, "liga": "Série C", "estadio": "Purgatory", "cap": 20666, "GK": 91, "DF": 86, "MF": 89, "FW": 88}, {"id": "108693", "nome": "Rosário", "tier": 1, "liga": "Série C", "estadio": "Arena da Campanha", "cap": 40000, "GK": 89, "DF": 86, "MF": 87, "FW": 87}, {"id": "114162", "nome": "Trem-Bala de Cotia", "tier": 1, "liga": "Série C", "estadio": "Arena Juvenal Juvêncio", "cap": 1450, "GK": 72, "DF": 83, "MF": 88, "FW": 86}, {"id": "114416", "nome": "Futebol FC", "tier": 2, "liga": "Série B", "estadio": "stadium", "cap": 5450, "GK": 88, "DF": 86, "MF": 84, "FW": 85}, {"id": "108919", "nome": "Pedrow FC", "tier": 1, "liga": "Série C", "estadio": "Estádio São Silvestre", "cap": 20000, "GK": 74, "DF": 70, "MF": 70, "FW": 77}, {"id": "117444", "nome": "El Mineiro", "tier": 1, "liga": "Série C", "estadio": "Arena Impedimento Letal", "cap": 1450, "GK": 81, "DF": 75, "MF": 68, "FW": 90}, {"id": "34893", "nome": "Black Griffins FC", "tier": 1, "liga": "Série C", "estadio": "Ninho dos Grifos", "cap": 70000, "GK": 85, "DF": 72, "MF": 75, "FW": 88}, {"id": "108936", "nome": "Fabão FC", "tier": 1, "liga": "Série C", "estadio": "Baixada do Centro", "cap": 31000, "GK": 88, "DF": 75, "MF": 77, "FW": 83}, {"id": "108529", "nome": "Borussia Monte Cheio De Gado", "tier": 1, "liga": "Série C", "estadio": "Borussia-Pasto", "cap": 4000, "GK": 90, "DF": 74, "MF": 66, "FW": 90}];
+render();
+</script>
+</body>
+</html>
