@@ -323,7 +323,10 @@ function simularTemporada() {
   const pos = tab[grupoAntes].indexOf(G.clubeId) + 1;
   const titulo = pos === 1;
   if (titulo) G.titulos++;
-  if (grupoAntes === "CB" && pos <= 2) G.intlQual = { clubeId: G.clubeId, tipo: pos === 1 ? "CHAMPIONS" : "CHALLENGE" };
+  // vagas internacionais: campeão do CB -> Champions; vice do CB ou campeão da Copa -> Challenge
+  if (grupoAntes === "CB" && pos === 1) G.intlQual = { clubeId: G.clubeId, tipo: "CHAMPIONS", via: "Brasileirão" };
+  else if (grupoAntes === "CB" && pos === 2) G.intlQual = { clubeId: G.clubeId, tipo: "CHALLENGE", via: "Brasileirão" };
+  else if (copa.campeao) G.intlQual = { clubeId: G.clubeId, tipo: "CHALLENGE", via: "Copa do Brasil" };
 
   const { novo, playoff } = aplicarTransicoes(tab);
   let playoffInfo = null;
@@ -348,7 +351,7 @@ function simularTemporada() {
   G.espaco = clamp(G.espaco + (nota >= 7 ? 5 : nota < 6 ? -5 : 0) + (50 - G.espaco) * 0.15, 0, 100);
 
   const row = { idade: G.idade, clubeId: G.clubeId, ovr: Math.round(ovrAntes), jogos, gols, ass, nota, pos, titulo, selNovos, tier: tierAntes, mov,
-    ligaAntes: rotuloGrupo(grupoAntes), grupoAntes, grupoDepois: clube.grupo, playoff: playoffInfo, intlRes, copa, intlNova: G.intlQual ? G.intlQual.tipo : null };
+    ligaAntes: rotuloGrupo(grupoAntes), grupoAntes, grupoDepois: clube.grupo, playoff: playoffInfo, intlRes, copa, intlNova: G.intlQual ? G.intlQual.tipo : null, intlVia: G.intlQual ? G.intlQual.via : null };
   G.hist.push(row);
   G.ultimoRes = { ...row, tit, delta: G.ovr - ovrAntes, ovrDepois: Math.round(G.ovr), valor: valorMercadoAtual() };
   G.fx = { jogosMult: 1, ofertas: G.fx.ofertas };
@@ -538,7 +541,7 @@ function render() {
         ${r.copa && r.copa.fase ? `Copa do Brasil: <b class="${r.copa.campeao ? "tag-pos" : ""}">${textoCopa(r.copa)}</b><br>` : ""}
         ${r.playoff ? `Playoff de acesso contra o ${esc(r.playoff.adv)}: <b class="${r.playoff.venceu ? "tag-pos" : "tag-neg"}">${r.playoff.venceu ? "venceu e subiu pro Brasileirão!" : "perdeu e ficou na Série B"}</b><br>` : ""}
         ${r.intlRes ? `🌎 ${r.intlRes.tipo === "CHAMPIONS" ? "Champions" : "Challenge"}: <b class="${r.intlRes.campeao ? "tag-pos" : ""}">${r.intlRes.campeao ? "CAMPEÃO! 🏆" : "eliminado — " + r.intlRes.fase}</b><br>` : ""}
-        ${r.intlNova ? `🌎 Classificado para a <b>${r.intlNova === "CHAMPIONS" ? "Champions" : "Challenge"}</b> na próxima temporada (se seguir no clube)<br>` : ""}
+        ${r.intlNova ? `🌎 Classificado para a <b>${r.intlNova === "CHAMPIONS" ? "Champions" : "Challenge"}</b> na próxima temporada, ${r.intlVia === "Copa do Brasil" ? "pela" : "pelo"} ${r.intlVia} (se seguir no clube)<br>` : ""}
         Titularidade na temporada: ${r.tit}% · OVR ${r.ovr} → <b class="${r.delta >= 0 ? "tag-pos" : "tag-neg"}">${r.ovrDepois}</b> (${r.delta >= 0 ? "+" : ""}${r.delta.toFixed(1)})<br>
         Valor de mercado: <b>${fmtValor(r.valor)}</b>${r.selNovos ? `<br>🇧🇷 Convocado: ${r.selNovos} jogos pela Seleção` : ""}</div>
       <button class="btn" onclick="proximo()">Continuar</button></div>`;
