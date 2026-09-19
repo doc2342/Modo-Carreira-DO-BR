@@ -107,6 +107,15 @@ function fmtValor(v) {
   return "R$ " + Math.round(v / 1e3) + "K";
 }
 
+const LIGA_TIER = { 1: "Série C", 2: "Série B", 3: "Brasileirão" };
+function aplicarTiers() { // tier de cada clube = original + mudanças de acesso/rebaixamento da carreira
+  CLUBES.forEach(c => { if (c.tier0 === undefined) c.tier0 = c.tier; c.tier = (G && G.tiers && G.tiers[c.id]) || c.tier0; c.liga = LIGA_TIER[c.tier]; });
+}
+function moverClube(c, novoTier) {
+  G.tiers = G.tiers || {};
+  G.tiers[c.id] = novoTier; c.tier = novoTier; c.liga = LIGA_TIER[novoTier];
+}
+
 function forcaClube(c) { // 0.4 do OVR-escala do clube pelos dados + base do tier
   const media = (c.GK + c.DF + c.MF + c.FW) / 4;
   const off = clamp((media - 90) * 0.5, -4, 4);
@@ -135,11 +144,12 @@ function valorMercado(ovr, idade) {
 function classeTit(t) { return t >= 60 ? "" : t >= 25 ? "media" : "baixa"; }
 
 function novaCarreira(dados) {
-  G = {
+  G = { tiers: {},
     ...dados, ovr: 52, potencial: rndInt(72, 92), idade: 16, clubeId: null, espaco: 50,
     titulos: 0, selJogos: 0, selConv: false, hist: [], fase: "oferta_base", eventos: [], evIdx: 0,
     fx: { jogosMult: 1, ofertas: 0 }, log: [], ofertas: []
   };
+  aplicarTiers();
 }
 
 function salvar() { try { localStorage.setItem(CHAVE_SAVE, JSON.stringify(G)); } catch (e) {} }
@@ -233,6 +243,19 @@ function simularTemporada() {
   const titulo = pos === 1;
   if (titulo) G.titulos++;
 
+  // acesso (2 primeiros) e rebaixamento (2 últimos) - o clube troca de divisão
+  // e um outro clube da divisão vizinha faz o caminho inverso (mantém o tamanho das ligas)
+  let mov = null;
+  const tierAntes = clube.tier;
+  if (pos <= 2 && clube.tier < 3) mov = "A";
+  else if (pos >= 19 && clube.tier > 1) mov = "R";
+  if (mov) {
+    const novo = tierAntes + (mov === "A" ? 1 : -1);
+    const troca = pick(CLUBES.filter(c => c.tier === novo && c.id !== clube.id));
+    moverClube(clube, novo);
+    if (troca) moverClube(troca, tierAntes);
+  }
+
   // seleção
   let selNovos = 0;
   if (G.idade >= 19 && Math.random() < clamp((G.ovr - 78) / 12, 0, 0.9)) { selNovos = rndInt(2, 9); G.selJogos += selNovos; G.selConv = true; }
@@ -245,7 +268,7 @@ function simularTemporada() {
   G.ovr = clamp(G.ovr + delta, 30, 99);
   G.espaco = clamp(G.espaco + (nota >= 7 ? 5 : nota < 6 ? -5 : 0) + (50 - G.espaco) * 0.15, 0, 100);
 
-  const row = { idade: G.idade, clubeId: G.clubeId, ovr: Math.round(ovrAntes), jogos, gols, ass, nota, pos, titulo, selNovos, tier: clube.tier };
+  const row = { idade: G.idade, clubeId: G.clubeId, ovr: Math.round(ovrAntes), jogos, gols, ass, nota, pos, titulo, selNovos, tier: tierAntes, mov, ligaAntes: LIGA_TIER[tierAntes] };
   G.hist.push(row);
   G.ultimoRes = { ...row, tit, delta: G.ovr - ovrAntes, ovrDepois: Math.round(G.ovr), valor: valorMercadoAtual() };
   G.fx = { jogosMult: 1, ofertas: G.fx.ofertas };
@@ -319,7 +342,7 @@ function telaInicio() {
       <p class="fraco" style="margin:14px 0 30px">Faça escolhas e conquiste espaço.<br>Do juvenil aos 38 anos, com os clubes do Dugout.</p>
       <div class="linha" style="justify-content:center">
         <button class="btn" onclick="telaCriar()">Começar agora</button>
-        ${save ? `<button class="btn sec" onclick="G=carregarSave();render()">Continuar carreira</button>` : ""}
+        ${save ? `<button class="btn sec" onclick="G=carregarSave();aplicarTiers();render()">Continuar carreira</button>` : ""}
       </div>
     </div>`;
 }
@@ -352,7 +375,7 @@ function ajustaNum(d) { formCriar.num = clamp(formCriar.num + d, 1, 99); documen
 function jogarAgora() {
   const nome = (formCriar.nome || "").trim() || "Jogador";
   novaCarreira({ nome, num: formCriar.num, altura: formCriar.altura, peso: formCriar.peso, pe: formCriar.pe, pos: formCriar.pos });
-  G.ofertas = ofertasBase(); salvar(); render();
+  aplicarTiers(); G.ofertas = ofertasBase(); salvar(); render();
 }
 
 function cabecalho() {
@@ -380,7 +403,7 @@ function cabecalho() {
 function tabelaHist() {
   const linhas = G.hist.map(h => {
     const c = clubePorId(h.clubeId);
-    return `<tr><td>${h.idade}</td><td>${esc(c.nome)}${h.titulo ? " 🏆" : ""}</td><td class="c">${h.ovr}</td><td class="c">${h.jogos}</td><td class="c">${h.gols}</td><td class="c">${h.ass}</td></tr>`;
+    return `<tr><td>${h.idade}</td><td>${esc(c.nome)}${h.titulo ? " 🏆" : ""}${h.mov === "A" ? " <span class=\"tag-pos\">▲</span>" : ""}${h.mov === "R" ? " <span class=\"tag-neg\">▼</span>" : ""}</td><td class="c">${h.ovr}</td><td class="c">${h.jogos}</td><td class="c">${h.gols}</td><td class="c">${h.ass}</td></tr>`;
   }).join("");
   const atual = (G.fase !== "fim" && G.fase !== "oferta_base" && G.fase !== "resultado")
     ? `<tr class="atual"><td>${G.idade}</td><td>${esc(clubePorId(G.clubeId).nome)}</td><td class="c">${Math.round(G.ovr)}</td><td class="c">—</td><td class="c">—</td><td class="c">—</td></tr>` : "";
@@ -431,7 +454,7 @@ function render() {
       <h2 style="margin:4px 0 8px">${esc(c.nome)}</h2>
       <div class="stats"><div class="stat"><b>${r.jogos}</b><small>Jogos</small></div><div class="stat"><b>${r.gols}</b><small>Gols</small></div>
         <div class="stat"><b>${r.ass}</b><small>Assist.</small></div><div class="stat"><b>${r.jogos ? r.nota.toFixed(1) : "—"}</b><small>Nota</small></div></div>
-      <div class="resultado-msg">${c.liga}: terminou em <b>${ordinal}</b>${r.titulo ? ` — <b class="tag-pos">CAMPEÃO! 🏆</b>` : ""}<br>
+      <div class="resultado-msg">${r.ligaAntes}: terminou em <b>${ordinal}</b>${r.titulo ? ` — <b class="tag-pos">CAMPEÃO! 🏆</b>` : ""}${r.mov === "A" ? ` — <b class="tag-pos">⬆ ACESSO para a ${c.liga}!</b>` : ""}${r.mov === "R" ? ` — <b class="tag-neg">⬇ REBAIXADO para a ${c.liga}</b>` : ""}<br>
         Titularidade na temporada: ${r.tit}% · OVR ${r.ovr} → <b class="${r.delta >= 0 ? "tag-pos" : "tag-neg"}">${r.ovrDepois}</b> (${r.delta >= 0 ? "+" : ""}${r.delta.toFixed(1)})<br>
         Valor de mercado: <b>${fmtValor(r.valor)}</b>${r.selNovos ? `<br>🇧🇷 Convocado: ${r.selNovos} jogos pela Seleção` : ""}</div>
       <button class="btn" onclick="proximo()">Continuar</button></div>`;
